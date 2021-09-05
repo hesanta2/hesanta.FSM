@@ -16,5 +16,6 @@ namespace hesanta.FSM
         void AddTransition(ITransition trasition);
         void AddTransitions(params ITransition[] transitions);
         Task RunAsync();
+        void Update();
     }
 }

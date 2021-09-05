@@ -19,6 +19,8 @@ namespace hesanta.FSM
     {
         private ICollection<IState> internalStates = new HashSet<IState>();
         private ICollection<ITransition> internalTransitions = new HashSet<ITransition>();
+        private bool initiated = false;
+
         public FSMStatus Status { get; protected set; } = FSMStatus.NotStarted;
         public IState CurrentState { get; protected set; }
         public IStartState StartState => States.FirstOrDefault(x => x is IStartState) as IStartState;
@@ -63,13 +65,25 @@ namespace hesanta.FSM
 
         public Task RunAsync()
         {
-            if (CurrentState == null)
-            {
-                CurrentState = StartState;
-            }
-
             return Task.Run(() =>
             {
+                while (!(CurrentState is IEndState))
+                {
+                    Update();
+                }
+                Update();
+            });
+        }
+
+        public void Update()
+        {
+            if (!initiated)
+            {
+                if (CurrentState == null)
+                {
+                    CurrentState = StartState;
+                }
+
                 if (!States.Any(x => x is IStartState))
                 {
                     throw new InvalidOperationException("There is not an state type of 'IStartState'");
@@ -80,25 +94,26 @@ namespace hesanta.FSM
                     Status = FSMStatus.NotStarted;
                     return;
                 }
+            }
 
-                while (!(CurrentState is IEndState))
-                {
-                    Status = FSMStatus.Running;
-                    if (CurrentState.Execute != null) { CurrentState.Execute(); }
-                    var stateTransitions = GetStateTransitions(CurrentState);
-                    foreach (var transition in stateTransitions)
-                    {
-                        IState transitionedState = transition.EvaluateFunc();
-                        if (transitionedState != null)
-                        {
-                            CurrentState = transitionedState;
-                        }
-                    }
-                }
-
+            if (CurrentState is IEndState)
+            {
                 if (CurrentState.Execute != null) { CurrentState.Execute(); }
                 Status = FSMStatus.Finished;
-            });
+                return;
+            }
+
+            Status = FSMStatus.Running;
+            if (CurrentState.Execute != null) { CurrentState.Execute(); }
+            var stateTransitions = GetStateTransitions(CurrentState);
+            foreach (var transition in stateTransitions)
+            {
+                IState transitionedState = transition.EvaluateFunc();
+                if (transitionedState != null)
+                {
+                    CurrentState = transitionedState;
+                }
+            }
         }
 
         private IEnumerable<ITransition> GetStateTransitions(IState state)

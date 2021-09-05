@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="TrueColorConsole" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\hesanta.Drawing\lib\src\hesanta.Drawing.ASCII\hesanta.Drawing.ASCII.csproj" />
+    <ProjectReference Include="..\..\..\hesanta.Drawing\lib\src\hesanta.Drawing\hesanta.Drawing.csproj" />
     <ProjectReference Include="..\..\lib\src\hesanta.FSM\hesanta.FSM.csproj" />
   </ItemGroup>
 

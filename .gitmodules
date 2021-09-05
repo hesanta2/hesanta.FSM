@@ -1,0 +1,9 @@
+[submodule "lib/src/hesanta.Drawing"]
+	path = lib/src/hesanta.Drawing
+	url = https://github.com/hesanta2/hesanta.Drawing.git
+[submodule "submodule/hesanta.Drawing"]
+	path = submodule/hesanta.Drawing
+	url = https://github.com/hesanta2/hesanta.Drawing.git
+[submodule "lib/src/submodule/hesanta.Drawing"]
+	path = lib/src/submodule/hesanta.Drawing
+	url = https://github.com/hesanta2/hesanta.Drawing.git
