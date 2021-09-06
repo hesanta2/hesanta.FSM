@@ -18,38 +18,57 @@ namespace hesanta.FSM.Sample
 
         private void InitFSM()
         {
-            var idleState = new StartState("Idle", () =>
+            var idle = new StartState("Idle", () =>
             {
                 bullet.Shooting = false;
-                bullet.Position.Y = bullet.Ship.Position.Y + 1;
-                bullet.Position.X = bullet.Ship.Position.X + bullet.Ship.Size.Width / 2;
+                bullet.Destroyed = false;
+                bullet.Position.Y = bullet.UpDirection ? bullet.Emisor.Position.Y + 1 : bullet.Emisor.Position.Y + bullet.Emisor.Size.Height + 1;
+                bullet.Position.X = bullet.Emisor.Position.X + bullet.Emisor.Size.Width / 2;
             });
-            var shootingState = new State("Shooting", () =>
+            var shooting = new State("Shooting", () =>
             {
                 bullet.Shooting = true;
-                bullet.Position.Y -= bullet.Velocity * bullet.Engine.DeltaTime;
+                var direction = bullet.UpDirection ? -1 : 1;
+
+                bullet.Position.Y += bullet.Velocity * direction * bullet.Engine.DeltaTime;
             });
 
-            var idleToshootingTransition = new Transition(idleState, shootingState, () =>
+            var destroyed = new State("Destroyed", () =>
+            {
+            });
+
+            var idleToshootingTransition = new Transition(idle, shooting, () =>
             {
                 if (bullet.Shoot)
                 {
                     bullet.Shoot = false;
-                    return shootingState;
+                    return shooting;
                 }
 
                 return null;
             });
-            var shootingToidleTransition = new Transition(shootingState, idleState, () =>
+            var shootingTodestroyedTransition = new Transition(shooting, destroyed, () =>
             {
-                if (bullet.Position.Y > 0)
+                if (bullet.Destroyed)
+                {
+                    return destroyed;
+                }
+
+                if ((bullet.UpDirection && bullet.Position.Y > 0) || (!bullet.UpDirection && bullet.Position.Y < bullet.Engine.Graphics.Height))
                 {
                     return null;
                 }
-                return idleState;
+
+                return destroyed;
             });
 
-            AddTransitions(idleToshootingTransition, shootingToidleTransition);
+            var destroyedToIdle = new Transition(destroyed, idle, () =>
+            {
+                return idle;
+            });
+
+
+            AddTransitions(idleToshootingTransition, shootingTodestroyedTransition, destroyedToIdle);
         }
 
     }

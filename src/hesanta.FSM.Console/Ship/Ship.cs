@@ -11,44 +11,50 @@ namespace hesanta.FSM.Sample
 {
     public partial class Ship : EngineObject<string>
     {
-        public float Velocity { get; set; } = 2.5f;
         private float bulletVelocity = 50;
 
-        public Bullet BulletObject { get; protected set; }
-        public ShipFSM FSM { get; set; }
+        public IFSM FSM { get; set; }
+        public float Velocity { get; set; } = 2.5f;
+        public Bullet Bullet { get; protected set; }
         public bool Left { get; protected set; }
         public bool Right { get; private set; }
+        public bool Destroyed { get; internal set; }
 
         public Ship(IGraphicsEngine<string> engine) : base(engine)
         {
             FSM = new ShipFSM(this);
-            BulletObject = new Bullet(engine, this, bulletVelocity);
+            Bullet = new Bullet(engine, this, bulletVelocity);
         }
 
         public override void InternalDraw(params object[] args)
         {
-            ConsoleKey?  pressedKey = args.Any() ? args[0] as ConsoleKey? : null;
+            ConsoleKey? pressedKey = args.Any() ? args[0] as ConsoleKey? : null;
             FSM.Update();
 
             Left = false;
             Right = false;
-            if (pressedKey == ConsoleKey.LeftArrow && Position.X > 0)
+            if (pressedKey == ConsoleKey.LeftArrow)
             {
                 Left = true;
                 Right = false;
             }
-            if (pressedKey == ConsoleKey.RightArrow && Position.X < Engine.Graphics.Width - Size.Width)
+            if (pressedKey == ConsoleKey.RightArrow)
             {
                 Right = true;
                 Left = false;
             }
+            if (pressedKey == ConsoleKey.Spacebar && !Bullet.Shooting)
+            {
+                Bullet.Shoot = true;
+            }
 
-            DrawString($@"
+            if (!Destroyed)
+                DrawString($@"
   _  
  /-\ 
 ´---`
 ", new SolidBrush(Color.Aqua), Position);
-            BulletObject?.Draw(pressedKey);
+            Bullet.Draw();
         }
     }
 }
