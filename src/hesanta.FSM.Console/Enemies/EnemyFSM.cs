@@ -33,10 +33,14 @@ namespace hesanta.FSM.Sample
                 enemy.Bullet.Shoot = true;
                 stopwatch.Restart();
             });
-            var destroy = new EndState("Destroy", () =>
+            var destroy = new State("Destroy", () =>
+            {
+                enemy.Destroy();
+                ship.Bullet.Destroyed = true;
+            });
+            var destroyed = new EndState("Destroyed", () =>
             {
                 enemy.Destroyed = true;
-                ship.Bullet.Destroyed = true;
             });
 
             var idleToDestroy = new Transition(idle, destroy, () =>
@@ -51,6 +55,15 @@ namespace hesanta.FSM.Sample
                     return destroy;
                 }
 
+                return null;
+            });
+
+            var destroyToDestroyed = new Transition(destroy, destroyed, () =>
+            {
+                if(!enemy.Destroying)
+                {
+                    return destroyed;
+                }
                 return null;
             });
 
@@ -71,7 +84,7 @@ namespace hesanta.FSM.Sample
                 return idle;
             });
 
-            AddTransitions(idleToDestroy, idleToShoot, shootToIdle);
+            AddTransitions(idleToDestroy, idleToShoot, shootToIdle, destroyToDestroyed);
         }
 
     }

@@ -32,7 +32,7 @@ namespace hesanta.FSM.Sample
 
             if (Shooting)
             {
-                DrawString(UpDirection ? "^" : "v", new SolidBrush(Color.Aqua), Position);
+                DrawString(UpDirection ? "^" : "|", new SolidBrush(Color.Aqua), Position);
             }
         }
     }
